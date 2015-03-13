@@ -81,6 +81,38 @@ function dd(value){
       }else{
         return false;
       }
+    },
+    // 特定の要素に，特定の動作(イベント)を紐つける
+    // target_element : 紐つける要素
+    // role : 紐つけるイベント
+    // - upload : input[type="file"]の要素と紐付けて画像を読み込めるようにする
+    attach: function(target_element, role){
+      if(arguments.length != 2){
+        console.log("Error on $.imageCropper.attach() : Wrong number of arguments.");
+        return;
+      }
+      if(!$(target_element)){
+        console.log("Error on $("+target_element+"): It isn't exist.");
+      }
+      switch (role){
+        case "upload":
+          $(target_element).on("change",function(){
+            var file = this.files[0];
+            if (file == null) return;
+            if (!file.type.match(/^image\/(png|jpg|jpeg|gif)$/)) return;
+            var image = new Image();
+            var reader = new FileReader();
+            reader.onload = function(evt){
+              image.onload = function (){
+                console.log("loaded");
+              };
+              // evt.target.resultにはbase64エンコーディングされた画像が入っている
+              image.src = evt.target.result;
+            }
+            reader.readAsDataURL(file);
+          });
+          break;
+      }
     }
   });
   
@@ -134,21 +166,6 @@ function dd(value){
     },
     load: function (){
       
-    },
-    // 特定の要素に，特定の動作(イベント)を紐つける
-    // target_element : 紐つける要素
-    // role : 紐つけるイベント
-    // - upload : input[type="file"]の要素と紐付けて画像を読み込めるようにする
-    attach: function(target_element, role){
-      if(arguments.length != 2){
-        console.log("Error on $.imageCropper.attach() : Wrong number of arguments");
-        return;
-      }
-      switch (role){
-        case "upload":
-          
-          break;
-      }
     }
   });
   //// $.imageCropperを追加

@@ -18,4 +18,5 @@ $(function(){
   $("#rotateleft").on("click",function(){
     cropper.rotateLeft();
   });
+  cropper.attach("#uploadFile","upload");
 });
