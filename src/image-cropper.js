@@ -13,11 +13,12 @@
     // 切り抜き範囲を指し示すための半透明フレームを描画するキャンバス要素
     this.$cover_canvas = $container.children(".ic_cover_canvas");
     // 切り抜いた画像を描画するキャンバス要素
-    this.$crop = $container.children(".ic_crop");
+    this.$crop_camvas = $container.children(".ic_crop_canvas");
     // それぞれのコンテキスト
     this.ctx = this.getExtendedCanvasContext(this.$canvas);
     this.cover_ctx = this.getExtendedCanvasContext(this.$cover_canvas);
     this.crop_ctx = this.getExtendedCanvasContext(this.$crop);
+    this.image = null;
   };
   //// methods
   $.extend(Cropper.prototype,{
@@ -56,11 +57,26 @@
         return ctx;
     },
     rotateRight: function(){
-      
+      if(this.isImageExist()){
+        // 
+      }
     },
     rotateLeft: function(){
+      if(this.isImageExist()){
+        // 
+      }
     },
     zoom: function(){
+      if(this.isImageExist()){
+        // 
+      }
+    },
+    isImageExist: function(){
+      if(this.image){
+        return true;
+      }else{
+        return false;
+      }
     }
   });
   
@@ -107,10 +123,28 @@
                       '<canvas class="ic_cover_canvas"'+
                       'width="'+config.canvas.width+'"height="'+config.canvas.height+'">'+
                       '</canvas>'+
-                      '<canvas class="ic_crop"'+
+                      '<canvas class="ic_crop_canvas"'+
                       'width="'+config.crop.width+'" height="'+config.crop.height+'">'+
                       '</canvas>');
       return new Cropper($container);
+    },
+    load: function (){
+      
+    },
+    // 特定の要素に，特定の動作(イベント)を紐つける
+    // target_element : 紐つける要素
+    // role : 紐つけるイベント
+    // - upload : input[type="file"]の要素と紐付けて画像を読み込めるようにする
+    attach: function(target_element, role){
+      if(arguments.length != 2){
+        console.log("Error on $.imageCropper.attach() : Wrong number of arguments");
+        return;
+      }
+      switch (role){
+        case "upload":
+          
+          break;
+      }
     }
   });
   //// $.imageCropperを追加
