@@ -1,3 +1,7 @@
+function dd(value){
+	console.log(value);
+}
+
 (function ($) {
   "use strict";
   
@@ -17,7 +21,7 @@
     // それぞれのコンテキスト
     this.ctx = this.getExtendedCanvasContext(this.$canvas);
     this.cover_ctx = this.getExtendedCanvasContext(this.$cover_canvas);
-    this.crop_ctx = this.getExtendedCanvasContext(this.$crop);
+    this.crop_ctx = this.getExtendedCanvasContext(this.$crop_camvas);
     this.image = null;
   };
   //// methods
@@ -25,7 +29,7 @@
     // 引数に与えられたキャンバス要素のコンテキストを返す
     // コンテキストは少し拡張する
     getExtendedCanvasContext: function($canvas){
-      var ctx = $canvas.get(0).getContext('2d');
+	  var ctx = $canvas.get(0).getContext('2d');
       // 幅，高さをコンテキスト自体に持たせる(アクセスしやすいため)
       ctx.width = $canvas.width();
       ctx.height = $canvas.height();
