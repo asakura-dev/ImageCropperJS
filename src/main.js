@@ -1,5 +1,5 @@
 $(function(){
-  $.imageCropper.init(".crop-container",{
+  var cropper = $.imageCropper.init(".crop-container",{
     canvas : {
       width : "500px",
       height : "300px"
@@ -8,5 +8,14 @@ $(function(){
       width : "200px",
       height : "280px",
     }
+  });
+  // 右回転
+  $("#rotateRight").on("click",function(){
+    cropper.rotateRight();
+  });
+  
+  // 左回転
+  $("#rotateleft").on("click",function(){
+    cropper.rotateLeft();
   });
 });
