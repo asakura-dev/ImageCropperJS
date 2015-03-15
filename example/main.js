@@ -1,5 +1,5 @@
 $(function(){
-  var cropper = $.imageCropper.init(".crop-container",{
+  var cropper = $.imageCropper.new(".crop-container",{
     canvas : {
       width : "500px",
       height : "300px"
