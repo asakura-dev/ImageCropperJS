@@ -22,6 +22,14 @@ function dd(value){
     this.ctx = this.getExtendedCanvasContext(this.$canvas);
     this.cover_ctx = this.getExtendedCanvasContext(this.$cover_canvas);
     this.crop_ctx = this.getExtendedCanvasContext(this.$crop_camvas);
+    // imageはImageクラスのインスタンス
+    // 以下のプロパティを追加する
+    // image.base_width
+    // image.base_height
+    // image.draw_width
+    // image.draw_heihgt
+    // image.x
+    // image.y
     this.image = null;
     this.angle = 0;
   };
@@ -138,11 +146,28 @@ function dd(value){
       return {x : x, y : y};
     },
     // 特定の要素に，特定の動作(イベント)を紐つける
+    // 引数2つの場合
     // target_element : 紐つける要素
     // role : 紐つけるイベント
+    // 引数1つの場合 
+    // target_elementとroleが対になった連想配列
+    // roleの種類
     // - upload : input[type="file"]の要素と紐付けて画像を読み込めるようにする
-    attach: function(target_element, role){
+    // - rotateRight : 要素と紐付けて，右回転するようにする
+    // - rotateLeft  : 要素と紐付けて，左回転するようにする
+    attach: function(role, target_element){
       var cropper = this;
+      
+      // 連想配列が渡された時
+      // Example : cropper.attach({upload: ".hoge", rotateRight: "#huga"})
+      if (arguments.length == 1 && typeof role == "object"){
+        var roles = role;
+        for(role in roles){
+          this.attach(role, roles[role]);
+        }
+        return;
+      } 
+      
       if(arguments.length != 2){
         console.log("Error on $.imageCropper.attach() : Wrong number of arguments.");
         return;
@@ -163,6 +188,7 @@ function dd(value){
                 cropper.image = image;
                 var size = cropper.getFitSize(cropper.angle);
                 var pos = cropper.getCenterPosition(size["width"],size["height"]);
+                
                 cropper.ctx.drawImageWithAngle(image,pos["x"],pos["y"],size["width"],size["height"],cropper.angle);
               };
               // evt.target.resultにはbase64エンコーディングされた画像が入っている
@@ -171,6 +197,33 @@ function dd(value){
             reader.readAsDataURL(file);
           });
           break;
+        case "rotateRight":
+          $(target_element).on("click",function(){
+            cropper.rotateRight();
+          });
+          break;
+        case "rotateLeft":
+          $(target_element).on("click",function(){
+            cropper.rotateLeft();
+          });
+          break;
+        case "zoom":
+          (function(){
+            var min = $(target_element).attr("min");
+            if(min == undefined){
+              min = 0;
+              $(target_element).attr("min", min);
+            }
+            var max = $(target_element).attr("max");
+            if(max == undefined){
+              max = 50;
+              $(target_element).attr("max", max);
+            }
+            var middle = (min + max) / 2;
+            $(target_element).on("input change",function(){
+              
+            });
+          })();
       }
     }
   });

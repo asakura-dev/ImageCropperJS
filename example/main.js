@@ -9,14 +9,11 @@ $(function(){
       height : "280px",
     }
   });
-  // 右回転
-  $("#rotateRight").on("click",function(){
-    cropper.rotateRight();
-  });
   
-  // 左回転
-  $("#rotateleft").on("click",function(){
-    cropper.rotateLeft();
+  cropper.attach({
+    upload: "#uploadFile",
+    rotateRight: "#rotateRight",
+    rotateLeft : "#rotateLeft",
+    zoom : "#zoom"
   });
-  cropper.attach("#uploadFile","upload");
 });
