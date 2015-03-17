@@ -11,7 +11,7 @@ $(function(){
   });
   
   cropper.attach({
-    upload: "#uploadFile",
+    load: "#loadFile",
     rotateRight: "#rotateRight",
     rotateLeft : "#rotateLeft",
     zoom : "#zoom",

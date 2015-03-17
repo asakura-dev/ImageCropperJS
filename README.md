@@ -30,7 +30,7 @@
   <button id="rotateLeft">左回転</button>
   <button id="rotateRight">右回転</button>
   <!-- ・ファイルの選択 -->
-  <input type="file" id="uploadFile"><br>
+  <input type="file" id="loadFile"><br>
   <!-- ・拡大縮小 -->
   縮小<input type="range" max="100" min="0" id="zoom">拡大
   <br><br>
@@ -64,7 +64,7 @@ $(function(){
    
   /* 操作ボタンと実際の操作を紐つける */
   cropper.attach({
-    upload: "#uploadFile",
+    load: "#loadFile",
     rotateRight: "#rotateRight",
     rotateLeft : "#rotateLeft",
     zoom : "#zoom",

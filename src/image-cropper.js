@@ -236,14 +236,14 @@ function dd(value){
     // 引数1つの場合 
     // target_elementとroleが対になった連想配列
     // roleの種類
-    // - upload : input[type="file"]の要素と紐付けて画像を読み込めるようにする
+    // - load : input[type="file"]の要素と紐付けて画像を読み込めるようにする
     // - rotateRight : 要素と紐付けて，右回転するようにする
     // - rotateLeft  : 要素と紐付けて，左回転するようにする
     attach: function(role, target_element){
       var cropper = this;
       
       // 連想配列が渡された時
-      // Example : cropper.attach({upload: ".hoge", rotateRight: "#huga"})
+      // Example : cropper.attach({load: ".hoge", rotateRight: "#huga"})
       if (arguments.length == 1 && typeof role == "object"){
         var roles = role;
         for(role in roles){
@@ -260,7 +260,7 @@ function dd(value){
         console.log("Error on $("+target_element+"): It isn't exist.");
       }
       switch (role){
-        case "upload":
+        case "load":
           $(target_element).on("change",function(){
             var file = this.files[0];
             if (!file) return;
