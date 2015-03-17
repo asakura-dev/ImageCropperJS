@@ -14,6 +14,7 @@ $(function(){
     upload: "#uploadFile",
     rotateRight: "#rotateRight",
     rotateLeft : "#rotateLeft",
-    zoom : "#zoom"
+    zoom : "#zoom",
+    output: "#download_canvas_image"
   });
 });

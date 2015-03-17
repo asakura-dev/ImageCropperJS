@@ -18,11 +18,21 @@ function dd(value){
     // 切り抜き範囲を指し示すための半透明フレームを描画するキャンバス要素
     this.$cover_canvas = $container.children(".ic_cover_canvas");
     // 切り抜いた画像を描画するキャンバス要素
-    this.$crop_camvas = $container.children(".ic_crop_canvas");
+    this.$crop_canvas = $container.children(".ic_crop_canvas");
     // それぞれのコンテキスト
     this.ctx = this.getExtendedCanvasContext(this.$canvas);
     this.cover_ctx = this.getExtendedCanvasContext(this.$cover_canvas);
-    this.crop_ctx = this.getExtendedCanvasContext(this.$crop_camvas);
+    this.crop_ctx = this.getExtendedCanvasContext(this.$crop_canvas);
+    this.$output = undefined;
+    (function(){
+      self.cover_ctx.fillStyle = "rgba(100,100,100,0.5)";
+      self.cover_ctx.fillRect(0,0,self.cover_ctx.width,self.cover_ctx.height);
+      var x = (self.cover_ctx.width - self.crop_ctx.width) / 2;
+      var y = (self.cover_ctx.height - self.crop_ctx.height) / 2;
+      self.cover_ctx.clearRect(x,y,self.crop_ctx.width, self.crop_ctx.height);
+    })();
+    
+
     // imageはImageクラスのインスタンス
     // 以下のプロパティを追加する
     // image.base_width
@@ -33,23 +43,28 @@ function dd(value){
     // image.draw_y
     this.image = null;
     this.angle = 0;
-    $(".ic_canvas").on("mousedown",function(e){
+    $(".ic_cover_canvas").on("mousedown",function(e){
         this.touched = true;
         this.pageX = e.pageX;
         this.pageY = e.pageY;
     });
-    $(".ic_canvas").on("mouseup",function(e){
+    $(".ic_cover_canvas").on("mouseup",function(e){
+        self.updateCroppedImage();
+        self.setCroppedImageToElem();
         this.touched = false;
     });
-    $(".ic_canvas").on("mousemove",function(e){
+    $(".ic_cover_canvas").on("mousemove",function(e){
         if(this.touched == true){
           var x = e.pageX - this.pageX;
           var y = e.pageY - this.pageY;
           this.pageX = e.pageX;
           this.pageY = e.pageY;
-          self.image.draw_x += x;
-          self.image.draw_y += y;
-          self.ctx.drawImageWithAngle(self.image,self.image.draw_x,self.image.draw_y,self.image.draw_width,self.image.draw_height,self.angle);
+          if(self.isImageExist()){
+            self.image.draw_x += x;
+            self.image.draw_y += y;
+            self.ctx.drawImageWithAngle(self.image,self.image.draw_x,self.image.draw_y,self.image.draw_width,self.image.draw_height,self.angle);
+            self.updateCroppedImage();
+          }
         }
     });
   };
@@ -117,6 +132,8 @@ function dd(value){
         this.setPos(pos);
         this.resetZoomInput();
         this.ctx.drawImageWithAngle(this.image,pos["x"],pos["y"],size["width"],size["height"],this.angle);
+        this.updateCroppedImage();
+        this.setCroppedImageToElem();
       }
     },
     rotateLeft: function(){
@@ -132,6 +149,8 @@ function dd(value){
         this.setPos(pos);
         this.resetZoomInput();
         this.ctx.drawImageWithAngle(this.image,pos["x"],pos["y"],size["width"],size["height"],this.angle);
+        this.updateCroppedImage();
+        this.setCroppedImageToElem();
       }
     },
     zoom: function(zoom_ratio){
@@ -144,6 +163,7 @@ function dd(value){
         this.image.draw_width = new_width;
         this.image.draw_height = new_height;
         this.ctx.drawImageWithAngle(this.image,this.image.draw_x,this.image.draw_y,new_width,new_height,this.angle);
+        this.updateCroppedImage();
       }
     },
     resetZoomInput: function(){
@@ -193,6 +213,22 @@ function dd(value){
       this.image.draw_x = pos["x"];
       this.image.draw_y = pos["y"];
     },
+    updateCroppedImage: function(){
+      var cropper = this;
+      var x = cropper.image.draw_x - (cropper.ctx.width - cropper.crop_ctx.width) / 2;
+      var y = cropper.image.draw_y - (cropper.ctx.height - cropper.crop_ctx.height) / 2;
+      cropper.crop_ctx.drawImageWithAngle(cropper.image,x,y,cropper.image.draw_width,cropper.image.draw_height,cropper.angle);
+    },
+    setCroppedImageToElem:function(){
+      var cropper = this;
+      if(cropper.$output){
+        if(cropper.$output.prop("tagName") == 'A'){
+          cropper.$output.attr("href",cropper.$crop_canvas.get(0).toDataURL("image/png"));
+        }else{
+          cropper.$output.val(cropper.$crop_canvas.get(0).toDataURL("image/png"));
+        }
+      }
+    },
     // 特定の要素に，特定の動作(イベント)を紐つける
     // 引数2つの場合
     // target_element : 紐つける要素
@@ -239,6 +275,8 @@ function dd(value){
                 var pos = cropper.getCenterPosition(size["width"],size["height"]);
                 cropper.setPos(pos);
                 cropper.ctx.drawImageWithAngle(image,pos["x"],pos["y"],size["width"],size["height"],cropper.angle);
+                cropper.updateCroppedImage();
+                cropper.setCroppedImageToElem();
               };
               // evt.target.resultにはbase64エンコーディングされた画像が入っている
               image.src = evt.target.result;
@@ -275,7 +313,13 @@ function dd(value){
               var zoom_ratio = (value / middle);
               cropper.zoom(zoom_ratio);
             });
+            $(target_element).change(function(){
+              cropper.setCroppedImageToElem();
+            });
           })();
+          case "output":
+            cropper.$output = $(target_element);
+            break;
       }
     }
   });
@@ -322,6 +366,10 @@ function dd(value){
                       '<canvas class="ic_crop_canvas"'+
                       'width="'+config.crop.width+'" height="'+config.crop.height+'">'+
                       '</canvas>');
+      $container.css({
+        width: config.canvas.width,
+        height: config.canvas.height
+      });
       return new Cropper($container);
     }
   });
