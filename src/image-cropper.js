@@ -10,6 +10,7 @@ function dd(value){
   // インスタンスのメソッドを用いて，画像の回転や拡大率などを操作する
   //// constructor
   var Cropper = function($container){
+    var self = this;
     // キャンバス群を内包するコンテナ要素
     this.$container = $container;
     // 画像を描画するキャンバス要素
@@ -28,10 +29,29 @@ function dd(value){
     // image.base_height
     // image.draw_width
     // image.draw_heihgt
-    // image.x
-    // image.y
+    // image.draw_x
+    // image.draw_y
     this.image = null;
     this.angle = 0;
+    $(".ic_canvas").on("mousedown",function(e){
+        this.touched = true;
+        this.pageX = e.pageX;
+        this.pageY = e.pageY;
+    });
+    $(".ic_canvas").on("mouseup",function(e){
+        this.touched = false;
+    });
+    $(".ic_canvas").on("mousemove",function(e){
+        if(this.touched == true){
+          var x = e.pageX - this.pageX;
+          var y = e.pageY - this.pageY;
+          this.pageX = e.pageX;
+          this.pageY = e.pageY;
+          self.image.draw_x += x;
+          self.image.draw_y += y;
+          self.ctx.drawImageWithAngle(self.image,self.image.draw_x,self.image.draw_y,self.image.draw_width,self.image.draw_height,self.angle);
+        }
+    });
   };
   //// methods of Cropper
   $.extend(Cropper.prototype,{
@@ -92,7 +112,10 @@ function dd(value){
           this.angle += 90;
         }
         var size = this.getFitSize(this.angle);
+        this.setSize(size);
         var pos = this.getCenterPosition(size["width"],size["height"]);
+        this.setPos(pos);
+        this.resetZoomInput();
         this.ctx.drawImageWithAngle(this.image,pos["x"],pos["y"],size["width"],size["height"],this.angle);
       }
     },
@@ -104,14 +127,28 @@ function dd(value){
           this.angle -= 90;
         }
         var size = this.getFitSize(this.angle);
+        this.setSize(size);
         var pos = this.getCenterPosition(size["width"],size["height"]);
+        this.setPos(pos);
+        this.resetZoomInput();
         this.ctx.drawImageWithAngle(this.image,pos["x"],pos["y"],size["width"],size["height"],this.angle);
       }
     },
-    zoom: function(){
+    zoom: function(zoom_ratio){
       if(this.isImageExist()){
-        // 
+        zoom_ratio = 1 + zoom_ratio;
+        var new_width = this.image.base_width * zoom_ratio;
+        var new_height = this.image.base_height * zoom_ratio;
+        this.image.draw_x += (this.image.draw_width - new_width) / 2;
+        this.image.draw_y += (this.image.draw_height - new_height) / 2;
+        this.image.draw_width = new_width;
+        this.image.draw_height = new_height;
+        this.ctx.drawImageWithAngle(this.image,this.image.draw_x,this.image.draw_y,new_width,new_height,this.angle);
       }
+    },
+    resetZoomInput: function(){
+      if(!this.$zoom){ console.log('input[type="range"]がない'); return; }
+      this.$zoom.val((this.$zoom.attr("min")+this.$zoom.attr("max")) / 2);
     },
     isImageExist: function(){
       if(this.image){
@@ -139,11 +176,22 @@ function dd(value){
       }
       return {width: width, height: height};
     },
+    setSize: function(size){
+      this.image.draw_width = size["width"];
+      this.image.draw_height = size["height"];
+      this.image.draw_height = size["height"];
+      this.image.base_width = size["width"] / 2;
+      this.image.base_height = size["height"] / 2;
+    },
     getCenterPosition: function(width,height){
       var x,y;
       x = (this.ctx.width - width) / 2;
       y = (this.ctx.height - height) / 2;
       return {x : x, y : y};
+    },
+    setPos: function(pos){
+      this.image.draw_x = pos["x"];
+      this.image.draw_y = pos["y"];
     },
     // 特定の要素に，特定の動作(イベント)を紐つける
     // 引数2つの場合
@@ -187,8 +235,9 @@ function dd(value){
               image.onload = function (){
                 cropper.image = image;
                 var size = cropper.getFitSize(cropper.angle);
+                cropper.setSize(size);
                 var pos = cropper.getCenterPosition(size["width"],size["height"]);
-                
+                cropper.setPos(pos);
                 cropper.ctx.drawImageWithAngle(image,pos["x"],pos["y"],size["width"],size["height"],cropper.angle);
               };
               // evt.target.resultにはbase64エンコーディングされた画像が入っている
@@ -209,6 +258,7 @@ function dd(value){
           break;
         case "zoom":
           (function(){
+            cropper.$zoom = $(target_element);
             var min = $(target_element).attr("min");
             if(min == undefined){
               min = 0;
@@ -221,7 +271,9 @@ function dd(value){
             }
             var middle = (min + max) / 2;
             $(target_element).on("input change",function(){
-              
+              var value = $(this).val();
+              var zoom_ratio = (value / middle);
+              cropper.zoom(zoom_ratio);
             });
           })();
       }
