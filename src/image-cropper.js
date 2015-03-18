@@ -25,11 +25,13 @@ function dd(value){
     this.crop_ctx = this.getExtendedCanvasContext(this.$crop_canvas);
     this.$output = undefined;
     (function(){
-      self.cover_ctx.fillStyle = "rgba(100,100,100,0.5)";
+      self.cover_ctx.fillStyle = "rgba(250,250,250,0.8)";
       self.cover_ctx.fillRect(0,0,self.cover_ctx.width,self.cover_ctx.height);
+      self.cover_ctx.strokeStyle = "#555555";
       var x = (self.cover_ctx.width - self.crop_ctx.width) / 2;
       var y = (self.cover_ctx.height - self.crop_ctx.height) / 2;
       self.cover_ctx.clearRect(x,y,self.crop_ctx.width, self.crop_ctx.height);
+      self.cover_ctx.strokeRect(x,y,self.crop_ctx.width, self.crop_ctx.height);
     })();
     
 
